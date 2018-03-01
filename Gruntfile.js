@@ -127,6 +127,8 @@ module.exports = function( grunt ) {
 			},
 			qunit: [
 				"test/index.html",
+				"test/next.html",
+				"test/next2.html",
 				"test/autostart.html",
 				"test/startError.html",
 				"test/reorder.html",

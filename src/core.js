@@ -218,6 +218,36 @@ extend( QUnit, {
 		scheduleBegin();
 	},
 
+	next: function( callback ) {
+		if ( config.current ) {
+			throw new Error( "Called next() while current test is still executing" );
+		} else if ( ProcessingQueue.taskCount() > 0 ) {
+			throw new Error( "Called next() while test tasks have not completed" );
+		}
+
+		if ( typeof callback === "function" ) {
+			const blockingCallback = function() {
+				config.blocking = true;
+				callback();
+			};
+			ProcessingQueue.addTask( [ blockingCallback ] );
+		}
+
+		if ( !config.autostart ) {
+
+			// first call to next(), setup configs & set config.block = false, then calls begin() which calls advance()
+			config.autostart = true;
+			QUnit.load();
+		} else {
+
+			// next() has already been called at least once before. In this case, we should just call advance()
+			config.blocking = false;
+			ProcessingQueue.advance();
+		}
+
+		return ProcessingQueue.testCount();
+	},
+
 	config: config,
 
 	is: is,

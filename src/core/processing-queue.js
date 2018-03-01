@@ -33,7 +33,7 @@ const taskQueue = [];
 function advance() {
 	advanceTaskQueue();
 
-	if ( !taskQueue.length ) {
+	if ( !taskQueue.length && !config.blocking ) {
 		advanceTestQueue();
 	}
 }
@@ -81,7 +81,11 @@ function advanceTestQueue() {
  * @param {Array} tasksArray
  */
 function addToTaskQueue( tasksArray ) {
-	taskQueue.push( ...tasksArray );
+	if ( taskQueue.length === 0 ) {
+		taskQueue.push( ...tasksArray );
+	} else {
+		taskQueue.unshift( ...tasksArray );
+	}
 }
 
 /**
@@ -93,8 +97,16 @@ function taskQueueLength() {
 }
 
 /**
- * Adds a test to the TestQueue for execution.
- * @param {Function} testTasksFunc
+ * Return the number of tests remaining in the test queue to be processed.
+ * @return {Number}
+ */
+function testQueueLength() {
+	return config.queue.length;
+}
+
+/**
+ * Adds a tests to the TestQueue for execution.
+ * @param {Array} testTasksArray
  * @param {Boolean} prioritize
  * @param {String} seed
  */
@@ -171,8 +183,10 @@ function done() {
 const ProcessingQueue = {
 	finished: false,
 	add: addToTestQueue,
+	addTask: addToTaskQueue,
 	advance,
-	taskCount: taskQueueLength
+	taskCount: taskQueueLength,
+	testCount: testQueueLength
 };
 
 export default ProcessingQueue;

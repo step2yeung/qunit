@@ -205,6 +205,7 @@ Test.prototype = {
 
 			// The 'after' hook should only execute when there are not tests left and
 			// when the 'after' and 'finish' tasks are the only tasks left to process
+			// [TODO] should external tasks be executed if abort/cancel of test runs happens?
 			if ( hookName === "after" &&
 				hookOwner.unskippedTestsRun !== numberOfUnskippedTests( hookOwner ) - 1 &&
 				( config.queue.length > 0 || ProcessingQueue.taskCount() > 2 ) ) {
