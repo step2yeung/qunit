@@ -198,17 +198,7 @@ extend( QUnit, {
 				throw new Error( "Called start() outside of a test context when " +
 					"QUnit.config.autostart was true" );
 			} else if ( !config.pageLoaded ) {
-
-				// The page isn't completely loaded yet, so we set autostart and then
-				// load if we're in Node or wait for the browser's load event.
-				config.autostart = true;
-
-				// Starts from Node even if .load was not previously called. We still return
-				// early otherwise we'll wind up "beginning" twice.
-				if ( !defined.document ) {
-					QUnit.load();
-				}
-
+				setAutostartAndLoadInNode();
 				return;
 			}
 		} else {
@@ -220,7 +210,9 @@ extend( QUnit, {
 
 	next: function( callback ) {
 		if ( config.current ) {
-			throw new Error( "Called next() while current test is still executing" );
+			throw new Error( "QUnit.next cannot be called inside a test context." );
+		} else if ( globalStartCalled ) {
+			throw new Error( "QUnit.next cannot be called when QUnit.start has been called." );
 		} else if ( ProcessingQueue.taskCount() > 0 ) {
 			throw new Error( "Called next() while test tasks have not completed" );
 		}
@@ -233,9 +225,12 @@ extend( QUnit, {
 			ProcessingQueue.addTask( [ blockingCallback ] );
 		}
 
-		if ( !config.autostart ) {
+		if ( !config.pageLoaded ) {
+			setAutostartAndLoadInNode();
+		} else if ( !config.autostart ) {
 
-			// first call to next(), setup configs & set config.block = false, then calls begin() which calls advance()
+			// first call to next() if page is loaded
+			// setup configs & set config.block = false, then calls begin() which calls advance()
 			config.autostart = true;
 			QUnit.load();
 		} else {
@@ -293,6 +288,19 @@ QUnit.equiv = equiv;
 QUnit.dump = dump;
 
 registerLoggingCallbacks( QUnit );
+
+function setAutostartAndLoadInNode() {
+
+	// The page isn't completely loaded yet, so we set autostart and then
+	// load if we're in Node or wait for the browser's load event.
+	config.autostart = true;
+
+	// Starts from Node even if .load was not previously called. We still return
+	// early otherwise we'll wind up "beginning" twice.
+	if ( !defined.document ) {
+		QUnit.load();
+	}
+}
 
 function scheduleBegin() {
 
