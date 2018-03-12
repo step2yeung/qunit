@@ -25,6 +25,7 @@ let unitSampler;
 // After tests are dequeued from config.queue they are expanded into
 // a set of tasks in this queue.
 const taskQueue = [];
+const externalTaskQueue = [];
 
 /**
  * Advances the taskQueue to the next task. If the taskQueue is empty,
@@ -77,14 +78,22 @@ function advanceTestQueue() {
 }
 
 /**
+ * Adds external tasks, which will be added to the end of the task queue
+ * @param {Array} tasksArray
+ */
+function addToExternalTask( tasksArray ) {
+	externalTaskQueue.push( ...tasksArray );
+}
+
+/**
  * Enqueue the tasks for a test into the task queue.
  * @param {Array} tasksArray
  */
 function addToTaskQueue( tasksArray ) {
-	if ( taskQueue.length === 0 ) {
-		taskQueue.push( ...tasksArray );
-	} else {
-		taskQueue.unshift( ...tasksArray );
+	taskQueue.push( ...tasksArray );
+	if ( externalTaskQueue ) {
+		taskQueue.push( ...externalTaskQueue );
+		externalTaskQueue.length = 0;
 	}
 }
 
@@ -183,7 +192,7 @@ function done() {
 const ProcessingQueue = {
 	finished: false,
 	add: addToTestQueue,
-	addTask: addToTaskQueue,
+	addTask: addToExternalTask,
 	advance,
 	taskCount: taskQueueLength,
 	testCount: testQueueLength

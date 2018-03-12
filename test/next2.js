@@ -1,3 +1,5 @@
+var done = false;
+
 QUnit.next( function() {
 
 	// This function will be executed as a task when the first
@@ -13,7 +15,7 @@ QUnit.next( function() {
 	}, 250 );
 } );
 
-QUnit.module( "next 2 module" );
+QUnit.module( "next2 module" );
 
 QUnit.test( "first test", function( assert ) {
 	assert.expect( 1 );
@@ -28,4 +30,17 @@ QUnit.test( "second test", function( assert ) {
 QUnit.test( "third test", function( assert ) {
 	assert.expect( 1 );
 	assert.ok( false, "the third test should not be ran" );
+} );
+
+QUnit.done( function( details ) {
+	if ( done ) {
+		return;
+	}
+
+	done = true;
+
+	QUnit.test( "verify tests executed", function( assert ) {
+		assert.equal( details.total, 2, "Two tests executed" );
+		assert.equal( details.passed, 2, "Two tests passed" );
+	} );
 } );

@@ -205,14 +205,12 @@ extend( QUnit, {
 			throw new Error( "QUnit.start cannot be called inside a test context." );
 		}
 
-		scheduleBegin();
+		QUnit.next();
 	},
 
 	next: function( callback ) {
 		if ( config.current ) {
 			throw new Error( "QUnit.next cannot be called inside a test context." );
-		} else if ( globalStartCalled ) {
-			throw new Error( "QUnit.next cannot be called when QUnit.start has been called." );
 		} else if ( ProcessingQueue.taskCount() > 0 ) {
 			throw new Error( "Called next() while test tasks have not completed" );
 		}
@@ -227,12 +225,10 @@ extend( QUnit, {
 
 		if ( !config.pageLoaded ) {
 			setAutostartAndLoadInNode();
-		} else if ( !config.autostart ) {
+		} else if ( !config.started ) {
 
-			// first call to next() if page is loaded
-			// setup configs & set config.block = false, then calls begin() which calls advance()
-			config.autostart = true;
-			QUnit.load();
+			// first call to next() meaning run hasn't started
+			scheduleBegin();
 		} else {
 
 			// next() has already been called at least once before. In this case, we should just call advance()
