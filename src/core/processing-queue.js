@@ -45,19 +45,30 @@ function advanceTaskQueue() {
 	const start = now();
 	config.depth = ( config.depth || 0 ) + 1;
 
-	while ( taskQueue.length && !config.blocking ) {
+	advanceTaskQueueP( start );
+
+	config.depth--;
+}
+
+/**
+ * Recursive promise handler of each task
+ */
+function advanceTaskQueueP( start ) {
+	if ( taskQueue.length && !config.blocking ) {
 		const elapsedTime = now() - start;
 
 		if ( !defined.setTimeout || config.updateRate <= 0 || elapsedTime < config.updateRate ) {
 			const task = taskQueue.shift();
-			task();
+			Promise.resolve( task() ).then( function() {
+				if ( !taskQueue.length ) {
+					advance();
+				}
+				advanceTaskQueueP( start );
+			} );
 		} else {
 			setTimeout( advance );
-			break;
 		}
 	}
-
-	config.depth--;
 }
 
 /**
