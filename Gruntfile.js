@@ -119,13 +119,14 @@ module.exports = function( grunt ) {
 				"--web-security": "no",
 				inject: [
 					path.resolve( "./build/coverage-bridge.js" ),
-					require.resolve( "grunt-contrib-qunit/phantomjs/bridge" )
+					require.resolve( "grunt-contrib-qunit/chrome/bridge" )
 				],
 				urls: [
 					"http://localhost:8000/test/sandboxed-iframe.html"
 				]
 			},
 			qunit: [
+				"test/overload.html",
 				"test/index.html",
 				"test/autostart.html",
 				"test/startError.html",
@@ -150,7 +151,6 @@ module.exports = function( grunt ) {
 				"test/onerror/outside-test.html",
 				"test/only.html",
 				"test/seed.html",
-				"test/overload.html",
 				"test/preconfigured.html",
 				"test/regex-filter.html",
 				"test/regex-exclude-filter.html",
@@ -249,7 +249,7 @@ module.exports = function( grunt ) {
 
 	grunt.event.on( "qunit.coverage", function( file, coverage ) {
 		var testName = file.split( "/test/" ).pop().replace( ".html", "" );
-		var reportPath = path.join( "build/report/phantom", testName + ".json" );
+		var reportPath = path.join( "build/report/headless-chrome", testName + ".json" );
 
 		fs.ensureFileSync( reportPath );
 		fs.writeJsonSync( reportPath, coverage, { spaces: 0 } );
